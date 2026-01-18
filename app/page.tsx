@@ -38,33 +38,59 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-grow p-4 md:p-6 overflow-x-auto">
-        {/* Hot Tags Section */}
-        <div className="mb-6 flex items-center gap-3 flex-wrap">
-          <span className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-wider">HOT TAGS:</span>
-          <div className="tag-pill">
-            <span className="icon-fire">🔥</span>
-            <span>#AI</span>
+      <main className="flex-grow p-4 md:p-6">
+        <div className="w-full max-w-6xl mx-auto mb-8">
+          {/* Search Bar */}
+          <div className="search-wrapper mb-4">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="输入代币名称或合约地址..."
+              className="search-input font-data"
+            />
+            <div className="search-kbd font-data">/</div>
           </div>
-          <div className="tag-pill">
-            <span className="icon-fire">🔥</span>
-            <span>#Meme</span>
-          </div>
-          <div className="tag-pill">
-            <span>#DeFi</span>
-          </div>
-          <div className="tag-pill">
-            <span>#Gaming</span>
-          </div>
-          <div className="tag-pill">
-            <span>#NFT</span>
-          </div>
-          <div className="tag-pill">
-            <span>#BSC</span>
+
+          {/* Hot Search Tags */}
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-1 text-[11px] font-bold text-gray-600 uppercase tracking-widest whitespace-nowrap">
+              <svg className="icon-fire" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2c0 1.8-1.1 3.2-2.3 4.6C8.5 8 7 9.5 7 11.8c0 2.3 1.9 4.2 4.2 4.2s4.2-1.9 4.2-4.2c0-1.8-1-3.3-2.1-4.6C12.1 6 11 4.5 11 2h1z"/>
+              </svg>
+              热门搜索:
+            </div>
+
+            <div className="flex gap-2 font-data">
+              <button className="tag-pill">
+                <span className="text-[10px] opacity-50">#1</span> $BOME
+              </button>
+              <button className="tag-pill">
+                <span className="text-[10px] opacity-50">#2</span> $CN-MOON
+              </button>
+              <button className="tag-pill">
+                <span className="text-[10px] opacity-50">#3</span> $DOGE-CN
+              </button>
+              <button className="tag-pill">
+                <span className="text-[10px] opacity-50">#4</span> $CHEEMS
+              </button>
+              <button className="tag-pill">
+                <span className="text-[10px] opacity-50">#5</span> $PUMP
+              </button>
+              <button className="tag-pill">
+                <span className="text-[10px] opacity-50">#6</span> $WIF
+              </button>
+            </div>
           </div>
         </div>
 
-        <TrendingTable />
+        <div className="overflow-x-auto">
+          <TrendingTable />
+        </div>
       </main>
 
       {/* Footer */}
