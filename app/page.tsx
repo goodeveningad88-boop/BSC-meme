@@ -39,6 +39,31 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-grow p-4 md:p-6 overflow-x-auto">
+        {/* Hot Tags Section */}
+        <div className="mb-6 flex items-center gap-3 flex-wrap">
+          <span className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-wider">HOT TAGS:</span>
+          <div className="tag-pill">
+            <span className="icon-fire">🔥</span>
+            <span>#AI</span>
+          </div>
+          <div className="tag-pill">
+            <span className="icon-fire">🔥</span>
+            <span>#Meme</span>
+          </div>
+          <div className="tag-pill">
+            <span>#DeFi</span>
+          </div>
+          <div className="tag-pill">
+            <span>#Gaming</span>
+          </div>
+          <div className="tag-pill">
+            <span>#NFT</span>
+          </div>
+          <div className="tag-pill">
+            <span>#BSC</span>
+          </div>
+        </div>
+
         <TrendingTable />
       </main>
 

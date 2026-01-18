@@ -54,3 +54,36 @@ body {
   stroke-dashoffset: 100;
   animation: dash 2s linear forwards;
 }
+
+/* 热门标签专用样式 */
+.tag-pill {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 9999px; /* 药丸状 */
+  font-size: 11px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.tag-pill:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: var(--foreground);
+}
+
+/* 火焰图标的小动画 */
+@keyframes pulse-warm {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.icon-fire {
+  color: #f59e0b;
+  animation: pulse-warm 2s infinite;
+}
