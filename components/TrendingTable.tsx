@@ -5,12 +5,93 @@ import { MemeToken } from '@/types';
 import { fetchChineseTrendingTokens } from '@/lib/trending-api';
 
 type Timeframe = '1h' | '6h' | '24h';
+type SortField = 'price' | 'change' | 'volume' | 'liquidity' | 'marketCap';
+type SortDirection = 'asc' | 'desc';
+
+// 赛博朋克风格的字母头像颜色方案
+const CYBER_GRADIENTS = [
+  'linear-gradient(135deg, #00ffff 0%, #0080ff 100%)', // 青蓝
+  'linear-gradient(135deg, #ff00ff 0%, #8000ff 100%)', // 品红紫
+  'linear-gradient(135deg, #00ff88 0%, #00ffff 100%)', // 绿青
+  'linear-gradient(135deg, #ff0066 0%, #ff00ff 100%)', // 红粉
+  'linear-gradient(135deg, #ffff00 0%, #ff8800 100%)', // 黄橙
+  'linear-gradient(135deg, #0080ff 0%, #8000ff 100%)', // 蓝紫
+  'linear-gradient(135deg, #00ffff 0%, #00ff88 100%)', // 青绿
+  'linear-gradient(135deg, #ff8800 0%, #ff0066 100%)', // 橙红
+];
+
+// 代币头像组件
+function TokenAvatar({ token }: { token: MemeToken }) {
+  const [showFallback, setShowFallback] = useState(false);
+
+  // 当 token 变化时重置状态
+  useEffect(() => {
+    setShowFallback(false);
+  }, [token.address]);
+
+  // 基于代币 symbol 选择渐变色
+  const getGradient = () => {
+    const hash = token.symbol.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return CYBER_GRADIENTS[hash % CYBER_GRADIENTS.length];
+  };
+
+  // 获取显示字符（优先中文，否则首字母）
+  const getDisplayChar = () => {
+    // 查找第一个中文字符
+    const chineseMatch = token.symbol.match(/[\u4e00-\u9fa5]/);
+    if (chineseMatch) return chineseMatch[0];
+    // 否则返回首字母大写
+    return token.symbol.charAt(0).toUpperCase();
+  };
+
+  // 如果没有 logoUrl 或加载失败，显示字母头像
+  if (!token.logoUrl || showFallback) {
+    return (
+      <div
+        className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white shrink-0"
+        style={{
+          background: getGradient(),
+        }}
+      >
+        {getDisplayChar()}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={token.logoUrl}
+      alt={token.symbol}
+      className="w-8 h-8 rounded-lg shrink-0 object-cover"
+      onError={() => setShowFallback(true)}
+    />
+  );
+}
+
+// 排序图标组件
+function SortIcon({ field, currentField, direction }: { field: SortField; currentField: SortField | null; direction: SortDirection }) {
+  const isActive = field === currentField;
+  return (
+    <span className="inline-flex flex-col ml-1.5 text-[10px] leading-none gap-0.5">
+      <span style={{
+        color: isActive && direction === 'asc' ? 'var(--accent)' : 'var(--text-secondary)',
+        opacity: isActive && direction === 'asc' ? 1 : 0.3,
+      }}>▲</span>
+      <span style={{
+        color: isActive && direction === 'desc' ? 'var(--accent)' : 'var(--text-secondary)',
+        opacity: isActive && direction === 'desc' ? 1 : 0.3,
+      }}>▼</span>
+    </span>
+  );
+}
 
 export default function TrendingTable() {
   const [tokens, setTokens] = useState<MemeToken[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeframe, setTimeframe] = useState<Timeframe>('1h');
+  const [sortField, setSortField] = useState<SortField | null>('marketCap');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   useEffect(() => {
     loadTokens();
@@ -21,7 +102,19 @@ export default function TrendingTable() {
       setLoading(true);
       setError(null);
       const data = await fetchChineseTrendingTokens(timeframe);
-      setTokens(data);
+
+      // 前端再次去重，确保不显示重复代币（使用 symbol 去重）
+      const seenSymbols = new Set<string>();
+      const uniqueTokens = data.filter(token => {
+        const normalizedSymbol = token.symbol.toLowerCase().replace(/\s+/g, '');
+        if (seenSymbols.has(normalizedSymbol)) {
+          return false;
+        }
+        seenSymbols.add(normalizedSymbol);
+        return true;
+      });
+
+      setTokens(uniqueTokens);
     } catch (err) {
       setError('加载失败，请重试');
       console.error(err);
@@ -53,21 +146,66 @@ export default function TrendingTable() {
     navigator.clipboard.writeText(address);
   };
 
-  const getTokenAge = () => {
-    const ages = ['2h', '5h', '1d', '3d', '1w'];
-    return ages[Math.floor(Math.random() * ages.length)];
+  // 获取当前时间范围的涨幅
+  const getPriceChange = (token: MemeToken) => {
+    if (timeframe === '1h') return token.priceChange1h ?? token.priceChange24h;
+    if (timeframe === '6h') return token.priceChange6h ?? token.priceChange24h;
+    return token.priceChange24h;
   };
 
-  const get5mChange = () => {
-    return (Math.random() * 20 - 10).toFixed(2);
+  // 处理排序点击
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // 同一字段，切换方向
+      setSortDirection(prev => prev === 'desc' ? 'asc' : 'desc');
+    } else {
+      // 新字段，默认降序
+      setSortField(field);
+      setSortDirection('desc');
+    }
   };
+
+  // 排序后的代币列表
+  const sortedTokens = [...tokens].sort((a, b) => {
+    if (!sortField) return 0;
+
+    let aVal: number, bVal: number;
+    switch (sortField) {
+      case 'price':
+        aVal = a.price;
+        bVal = b.price;
+        break;
+      case 'change':
+        aVal = getPriceChange(a);
+        bVal = getPriceChange(b);
+        break;
+      case 'volume':
+        aVal = a.volume24h;
+        bVal = b.volume24h;
+        break;
+      case 'liquidity':
+        aVal = a.liquidity;
+        bVal = b.liquidity;
+        break;
+      case 'marketCap':
+        aVal = a.marketCap;
+        bVal = b.marketCap;
+        break;
+      default:
+        return 0;
+    }
+
+    return sortDirection === 'desc' ? bVal - aVal : aVal - bVal;
+  });
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96">
+      <div className="flex items-center justify-center min-h-80 p-6">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[var(--accent)] mx-auto mb-4"></div>
-          <p className="text-[var(--text-secondary)] text-sm font-data">LOADING DATA...</p>
+          <div className="w-8 h-8 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[var(--text-secondary)] text-sm">
+            加载中...
+          </p>
         </div>
       </div>
     );
@@ -75,14 +213,14 @@ export default function TrendingTable() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-96">
+      <div className="flex items-center justify-center min-h-80 p-6">
         <div className="text-center">
-          <p className="text-red-500 mb-4 font-data">{error}</p>
+          <p className="text-[var(--down)] mb-4 text-sm">{error}</p>
           <button
             onClick={loadTokens}
-            className="px-6 py-2 bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-black font-bold rounded transition-colors"
+            className="px-4 py-2 bg-transparent border border-[var(--accent)]/50 text-[var(--accent)] text-sm rounded transition-all hover:bg-[var(--accent)]/10"
           >
-            RETRY
+            重试
           </button>
         </div>
       </div>
@@ -90,18 +228,18 @@ export default function TrendingTable() {
   }
 
   return (
-    <div>
+    <div className="p-4 md:p-6">
       {/* Time Controls */}
-      <div className="mb-4 flex justify-between items-center">
+      <div className="mb-5 flex justify-between items-center">
         <div className="flex gap-2">
           {(['1h', '6h', '24h'] as Timeframe[]).map((tf) => (
             <button
               key={tf}
               onClick={() => setTimeframe(tf)}
-              className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all rounded ${
                 timeframe === tf
                   ? 'bg-[var(--accent)] text-black'
-                  : 'bg-white/5 text-[var(--text-secondary)] hover:bg-white/10'
+                  : 'bg-transparent border border-[var(--accent)]/30 text-[var(--text-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)]'
               }`}
             >
               {tf}
@@ -110,100 +248,128 @@ export default function TrendingTable() {
         </div>
         <button
           onClick={loadTokens}
-          className="px-4 py-1.5 bg-white/5 hover:bg-white/10 text-[var(--text-secondary)] text-xs font-bold uppercase tracking-wider transition-all"
+          className="px-4 py-2 bg-transparent border border-[var(--accent)]/30 text-[var(--text-secondary)] text-xs font-bold tracking-wide rounded transition-all hover:border-[var(--accent)] hover:text-[var(--accent)] flex items-center gap-2"
         >
-          🔄 REFRESH
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+          </svg>
+          刷新
         </button>
       </div>
 
       {/* Table */}
       {tokens.length > 0 ? (
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead>
-              <tr className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] border-b border-[var(--border)]">
-                <th className="pb-3 pl-2 font-medium"># Token</th>
-                <th className="pb-3 font-medium">Price</th>
-                <th className="pb-3 font-medium text-right">Age</th>
-                <th className="pb-3 font-medium text-right">5m</th>
-                <th className="pb-3 font-medium text-right">{timeframe}</th>
-                <th className="pb-3 font-medium text-right">Liquidity</th>
-                <th className="pb-3 pr-2 font-medium text-right">Mkt Cap</th>
-              </tr>
-            </thead>
-            <tbody className="text-xs font-data">
-              {tokens.map((token, index) => {
-                const fiveMinChange = parseFloat(get5mChange());
-                const tokenAge = getTokenAge();
+          {/* 表头 */}
+          <div className="grid grid-cols-6 items-center text-sm tracking-wide py-3 px-2 mb-1" style={{
+            borderBottom: '1px solid rgba(0, 255, 255, 0.1)',
+            color: 'var(--text-secondary)'
+          }}>
+            <div className="font-semibold pl-2">代币</div>
+            <div
+              className="font-semibold text-center cursor-pointer hover:text-[var(--accent)] transition-colors flex items-center justify-center"
+              onClick={() => handleSort('price')}
+            >
+              价格
+              <SortIcon field="price" currentField={sortField} direction={sortDirection} />
+            </div>
+            <div
+              className="font-semibold text-center cursor-pointer hover:text-[var(--accent)] transition-colors flex items-center justify-center"
+              onClick={() => handleSort('change')}
+            >
+              {timeframe}涨幅
+              <SortIcon field="change" currentField={sortField} direction={sortDirection} />
+            </div>
+            <div
+              className="font-semibold text-center cursor-pointer hover:text-[var(--accent)] transition-colors flex items-center justify-center"
+              onClick={() => handleSort('volume')}
+            >
+              24h交易量
+              <SortIcon field="volume" currentField={sortField} direction={sortDirection} />
+            </div>
+            <div
+              className="font-semibold text-center cursor-pointer hover:text-[var(--accent)] transition-colors flex items-center justify-center"
+              onClick={() => handleSort('liquidity')}
+            >
+              流动性
+              <SortIcon field="liquidity" currentField={sortField} direction={sortDirection} />
+            </div>
+            <div
+              className="font-semibold text-center cursor-pointer hover:text-[var(--accent)] transition-colors flex items-center justify-center"
+              onClick={() => handleSort('marketCap')}
+            >
+              市值
+              <SortIcon field="marketCap" currentField={sortField} direction={sortDirection} />
+            </div>
+          </div>
 
-                return (
-                  <tr
-                    key={token.address}
-                    className="table-row-hover border-b border-white/[0.03]"
-                  >
-                    {/* Token Info */}
-                    <td className="py-4 pl-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-gray-600 font-bold">#{index + 1}</span>
-                        <div className="w-6 h-6 bg-gradient-to-br from-[var(--accent)] to-yellow-600 rounded-full flex items-center justify-center text-[10px] font-bold text-black border border-[var(--accent)]/40">
-                          {token.symbol.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold text-white">
-                            {token.name}{' '}
-                            <span className="text-[10px] text-gray-500">/{token.symbol}</span>
-                          </div>
-                          {index < 5 && (
-                            <div className="text-[9px] text-[var(--accent)] bg-blue-500/10 px-1 inline-block rounded mt-0.5">
-                              BSC NEW
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
+          {/* 数据行 */}
+          {sortedTokens.map((token, index) => (
+            <a
+              key={token.address}
+              href={`https://bscscan.com/token/${token.address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group grid grid-cols-6 items-center py-3 px-2 rounded-md transition-all hover:bg-[rgba(0,255,255,0.05)] cursor-pointer"
+              style={{
+                borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
+              }}
+            >
+              {/* 代币 */}
+              <div className="flex items-center gap-3 pl-2">
+                <span className="text-[var(--text-secondary)] text-xs font-mono w-6 shrink-0">
+                  {index + 1}
+                </span>
+                <TokenAvatar token={token} />
+                <div className="text-sm font-semibold text-white whitespace-nowrap flex items-center gap-1.5">
+                  {token.symbol}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[var(--text-secondary)] opacity-0 group-hover:opacity-100">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                </div>
+              </div>
 
-                    {/* Price */}
-                    <td className="py-4 text-white">{formatPrice(token.price)}</td>
+              {/* 价格 */}
+              <div className="font-mono text-sm text-center" style={{color: 'var(--accent)'}}>
+                {formatPrice(token.price)}
+              </div>
 
-                    {/* Age */}
-                    <td className="py-4 text-right text-[var(--text-secondary)]">{tokenAge}</td>
+              {/* 涨幅 */}
+              <div className={`font-mono text-sm font-semibold text-center ${
+                getPriceChange(token) >= 0 ? 'text-[var(--up)]' : 'text-[var(--down)]'
+              }`}>
+                {formatChange(getPriceChange(token))}
+              </div>
 
-                    {/* 5m Change */}
-                    <td className="py-4 text-right">
-                      <span className={fiveMinChange >= 0 ? 'text-[var(--up)]' : 'text-[var(--down)]'}>
-                        {fiveMinChange >= 0 ? '+' : ''}{fiveMinChange}%
-                      </span>
-                    </td>
+              {/* 24h交易量 */}
+              <div className="text-white/80 font-mono text-sm text-center">
+                {formatNumber(token.volume24h)}
+              </div>
 
-                    {/* Timeframe Change */}
-                    <td className="py-4 text-right">
-                      <span
-                        className={`font-bold ${
-                          token.priceChange24h >= 0 ? 'text-[var(--up)]' : 'text-[var(--down)]'
-                        }`}
-                      >
-                        {formatChange(token.priceChange24h)}
-                      </span>
-                    </td>
+              {/* 流动性 */}
+              <div className="text-[var(--text-secondary)] font-mono text-sm text-center">
+                {formatNumber(token.liquidity)}
+              </div>
 
-                    {/* Liquidity */}
-                    <td className="py-4 text-right text-[var(--text-secondary)]">
-                      {formatNumber(token.liquidity)}
-                    </td>
-
-                    {/* Market Cap */}
-                    <td className="py-4 pr-2 text-right text-white">{formatNumber(token.marketCap)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+              {/* 市值 */}
+              <div className="text-white font-mono text-sm font-semibold text-center">
+                {formatNumber(token.marketCap)}
+              </div>
+            </a>
+          ))}
         </div>
       ) : (
-        <div className="text-center py-16 border border-[var(--border)] rounded">
-          <div className="text-4xl mb-4">🔍</div>
-          <p className="text-[var(--text-secondary)] mb-2 font-data">NO CHINESE MEME TOKENS FOUND</p>
-          <p className="text-xs text-[var(--text-secondary)]">Try switching timeframe or refresh later</p>
+        <div className="text-center py-16">
+          <div className="text-4xl mb-4 opacity-30">📊</div>
+          <p className="text-[var(--text-secondary)] mb-2 text-sm">
+            未找到中文MEME代币
+          </p>
+          <p className="text-xs text-[var(--text-secondary)]/60">
+            尝试切换时间范围或稍后刷新
+          </p>
         </div>
       )}
     </div>

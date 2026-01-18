@@ -4,102 +4,67 @@ import TrendingTable from '@/components/TrendingTable';
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative" style={{zIndex: 1}}>
       {/* Header */}
-      <header className="py-10 border-b border-[var(--border)] bg-[#0e1216]">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-center tracking-tight text-white uppercase italic">
-          BSC <span className="text-[var(--accent)]">中文Meme</span> 看板
-        </h1>
-        <p className="text-center text-[var(--text-secondary)] mt-2 text-sm font-data">
-          REAL-TIME DATA • BSC ECOSYSTEM • TRENDING NOW
-        </p>
+      <header className="relative" style={{ background: '#000000' }}>
+        <div className="py-6 px-4 md:px-6">
+          <div className="max-w-7xl mx-auto">
+            {/* 标题和搜索框并排 */}
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold tracking-wide neon-text font-cyber">
+                  BSC中文MEME看板
+                </h1>
+                <p className="text-[var(--text-secondary)] text-xs mt-1 tracking-wide">
+                  实时追踪 BSC 链上的中文 MEME 代币
+                </p>
+                <p className="text-[var(--text-secondary)] text-sm mt-1 flex items-center gap-1 font-bold">
+                  Tracker制作人：林晚晚的猫@linwanwan823
+                  <img
+                    src="/avatar.png"
+                    alt="林晚晚的猫"
+                    className="w-10 h-10 object-contain"
+                  />
+                </p>
+              </div>
+
+              {/* 搜索框 */}
+              <div className="relative w-56 md:w-72 shrink-0">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="搜索代币..."
+                  className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)]/50 transition-colors"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </header>
 
-      {/* Stats Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-b border-[var(--border)] bg-black/20 font-data">
-        <div className="p-4 border-r border-[var(--border)] text-center">
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">24h Volume</div>
-          <div className="text-lg font-bold text-white">$128.4M</div>
-        </div>
-        <div className="p-4 border-r border-[var(--border)] text-center">
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">Trending Pairs</div>
-          <div className="text-lg font-bold text-[var(--accent)]">1,204</div>
-        </div>
-        <div className="p-4 border-r border-[var(--border)] text-center md:border-r">
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">BSC Gas</div>
-          <div className="text-lg font-bold text-[var(--up)]">3 Gwei</div>
-        </div>
-        <div className="p-4 text-center">
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">Update In</div>
-          <div className="text-lg font-bold text-white">
-            <span className="inline-block animate-pulse">●</span> 5s
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
-      <main className="flex-grow p-4 md:p-6">
-        <div className="w-full max-w-6xl mx-auto mb-8">
-          {/* Search Bar */}
-          <div className="search-wrapper mb-4">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.3-4.3"/>
-              </svg>
-            </div>
-            <input
-              type="text"
-              placeholder="输入代币名称或合约地址..."
-              className="search-input font-data"
-            />
-            <div className="search-kbd font-data">/</div>
+      <main className="flex-grow py-6 px-4 md:py-8 md:px-6 relative" style={{background: '#000000'}}>
+        <div className="max-w-7xl mx-auto">
+          {/* Table Container */}
+          <div className="relative w-full rounded-lg overflow-hidden" style={{
+            background: 'rgba(0, 10, 20, 0.6)',
+            border: '1px solid rgba(0, 255, 255, 0.15)',
+            boxShadow: '0 4px 24px rgba(0, 0, 0, 0.4)'
+          }}>
+            <TrendingTable />
           </div>
-
-          {/* Hot Search Tags */}
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
-            <div className="flex items-center gap-1 text-[11px] font-bold text-gray-600 uppercase tracking-widest whitespace-nowrap">
-              <svg className="icon-fire" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2c0 1.8-1.1 3.2-2.3 4.6C8.5 8 7 9.5 7 11.8c0 2.3 1.9 4.2 4.2 4.2s4.2-1.9 4.2-4.2c0-1.8-1-3.3-2.1-4.6C12.1 6 11 4.5 11 2h1z"/>
-              </svg>
-              热门搜索:
-            </div>
-
-            <div className="flex gap-2 font-data">
-              <button className="tag-pill">
-                <span className="text-[10px] opacity-50">#1</span> $BOME
-              </button>
-              <button className="tag-pill">
-                <span className="text-[10px] opacity-50">#2</span> $CN-MOON
-              </button>
-              <button className="tag-pill">
-                <span className="text-[10px] opacity-50">#3</span> $DOGE-CN
-              </button>
-              <button className="tag-pill">
-                <span className="text-[10px] opacity-50">#4</span> $CHEEMS
-              </button>
-              <button className="tag-pill">
-                <span className="text-[10px] opacity-50">#5</span> $PUMP
-              </button>
-              <button className="tag-pill">
-                <span className="text-[10px] opacity-50">#6</span> $WIF
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <TrendingTable />
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--border)] bg-[#0e1216] py-6 text-center">
-        <p className="text-xs text-[var(--text-secondary)] font-data">
-          DATA SOURCE: DEXSCREENER API • BUILD: NEXT.JS + TAILWIND CSS
-        </p>
-        <p className="text-[10px] text-[var(--text-secondary)] mt-2">
-          © 2024 BSC MEME SCREENER • NOT FINANCIAL ADVICE
+      <footer className="py-6 px-4 text-center" style={{ background: '#000000', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <p className="text-xs text-[var(--text-secondary)]">
+          数据来源: DexScreener API · 仅供参考，不构成投资建议
         </p>
       </footer>
     </div>

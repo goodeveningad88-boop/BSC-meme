@@ -2,93 +2,207 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap');
 
 :root {
-  --background: #0a0e13;
-  --foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.08);
-  --accent: #f3ba2f;
-  --text-secondary: #8b949e;
-  --up: #22c55e;
-  --down: #ef4444;
+  --background: #000000;
+  --foreground: #e0e0ff;
+  --border: rgba(0, 255, 255, 0.2);
+  --accent: #00ffff;
+  --accent-pink: #ff00ff;
+  --accent-blue: #0080ff;
+  --text-secondary: #8b8ba0;
+  --up: #00ff88;
+  --down: #ff0066;
+  --glow-cyan: 0 0 20px rgba(0, 255, 255, 0.5);
+  --glow-pink: 0 0 20px rgba(255, 0, 255, 0.5);
+  --glow-blue: 0 0 20px rgba(0, 128, 255, 0.5);
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: 'Inter', 'PingFang SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  position: relative;
+}
+
+/* 雨夜城市背景效果 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(0, 255, 255, 0.03) 0%,
+      transparent 50%,
+      rgba(255, 0, 255, 0.03) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.font-cyber {
+  font-family: 'Orbitron', 'Share Tech Mono', monospace;
+  letter-spacing: 0.05em;
 }
 
 .font-mono {
-  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-family: 'Share Tech Mono', 'JetBrains Mono', monospace;
 }
 
 .font-data {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Share Tech Mono', monospace;
   font-variant-numeric: tabular-nums;
 }
 
+/* 霓虹发光文字 */
+.neon-text {
+  text-shadow:
+    0 0 10px rgba(0, 255, 255, 0.8),
+    0 0 20px rgba(0, 255, 255, 0.5),
+    0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+.neon-text-pink {
+  text-shadow:
+    0 0 10px rgba(255, 0, 255, 0.8),
+    0 0 20px rgba(255, 0, 255, 0.5),
+    0 0 30px rgba(255, 0, 255, 0.3);
+}
+
+/* 霓虹边框 */
+.neon-border {
+  border: 2px solid var(--accent);
+  box-shadow:
+    0 0 10px rgba(0, 255, 255, 0.4),
+    inset 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+.neon-border-pink {
+  border: 2px solid var(--accent-pink);
+  box-shadow:
+    0 0 10px rgba(255, 0, 255, 0.4),
+    inset 0 0 10px rgba(255, 0, 255, 0.1);
+}
+
+/* 扫描线效果 */
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(0, 255, 255, 0.3), transparent);
+  animation: scan 8s linear infinite;
+  pointer-events: none;
+}
+
+/* 表格行悬停 */
 .table-row-hover {
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.table-row-hover::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-pink));
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .table-row-hover:hover {
-  background-color: rgba(243, 186, 47, 0.03);
+  background: linear-gradient(90deg,
+    rgba(0, 255, 255, 0.05) 0%,
+    transparent 100%);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.table-row-hover:hover::before {
+  opacity: 1;
 }
 
-@keyframes dash {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.sparkline {
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  animation: dash 2s linear forwards;
-}
-
-/* 热门标签专用样式 */
+/* 热门标签 - 霓虹风格 */
 .tag-pill {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border);
-  padding: 4px 10px;
-  border-radius: 9999px; /* 药丸状 */
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  padding: 6px 12px;
+  border-radius: 4px;
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--accent);
   display: flex;
   align-items: center;
   gap: 4px;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.tag-pill::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+  transform: rotate(45deg);
+  transition: all 0.5s ease;
 }
 
 .tag-pill:hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.4);
-  color: var(--foreground);
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+  border-color: var(--accent);
+  box-shadow:
+    0 0 15px rgba(0, 255, 255, 0.4),
+    inset 0 0 10px rgba(0, 255, 255, 0.2);
+  color: #ffffff;
+  transform: translateY(-2px);
 }
 
-/* 火焰图标的小动画 */
-@keyframes pulse-warm {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+.tag-pill:hover::before {
+  left: 150%;
+}
+
+/* 火焰图标脉冲 */
+@keyframes pulse-neon {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.8));
+  }
+  50% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 1));
+  }
 }
 
 .icon-fire {
-  color: #f59e0b;
-  animation: pulse-warm 2s infinite;
+  color: var(--accent);
+  animation: pulse-neon 2s infinite;
 }
 
-/* 搜索框样式 */
+/* 搜索框 - 霓虹风格 */
 .search-wrapper {
   position: relative;
   width: 100%;
@@ -96,13 +210,14 @@ body {
 
 .search-input {
   width: 100%;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 80px 12px 40px;
+  background: #000000;
+  border: 2px solid rgba(0, 255, 255, 0.3);
+  border-radius: 0;
+  padding: 14px 90px 14px 45px;
   color: var(--foreground);
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
 }
 
 .search-input::placeholder {
@@ -111,9 +226,11 @@ body {
 
 .search-input:focus {
   outline: none;
-  border-color: rgba(243, 186, 47, 0.4);
-  background-color: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 3px rgba(243, 186, 47, 0.1);
+  border-color: var(--accent);
+  background: #000000;
+  box-shadow:
+    0 0 20px rgba(0, 255, 255, 0.3),
+    inset 0 0 20px rgba(0, 255, 255, 0.05);
 }
 
 .search-kbd {
@@ -121,14 +238,15 @@ body {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 4px 8px;
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+  border: 1px solid var(--accent);
+  padding: 4px 10px;
   font-size: 11px;
-  color: var(--text-secondary);
-  font-weight: 600;
+  color: var(--accent);
+  font-weight: 700;
   pointer-events: none;
+  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
 }
 
 /* 隐藏滚动条 */
@@ -139,4 +257,67 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* 霓虹按钮 */
+.neon-button {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  padding: 8px 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+.neon-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.neon-button:hover {
+  background: rgba(0, 255, 255, 0.1);
+  box-shadow:
+    0 0 20px rgba(0, 255, 255, 0.5),
+    inset 0 0 20px rgba(0, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.neon-button:hover::before {
+  left: 100%;
+}
+
+/* 数据显示发光效果 */
+.data-glow {
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* 故障效果 */
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+.glitch {
+  animation: glitch 0.3s infinite;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 }

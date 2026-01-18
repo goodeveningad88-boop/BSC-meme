@@ -4,6 +4,8 @@ export interface MemeToken {
   symbol: string;
   logoUrl?: string;
   price: number;
+  priceChange1h?: number;
+  priceChange6h?: number;
   priceChange24h: number;
   marketCap: number;
   volume24h: number;
