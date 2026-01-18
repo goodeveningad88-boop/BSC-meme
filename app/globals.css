@@ -2,11 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --background: #F9FAFB;
-  --foreground: #111827;
+  --background: #0a0e13;
+  --foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.08);
+  --accent: #f3ba2f;
+  --text-secondary: #8b949e;
+  --up: #22c55e;
+  --down: #ef4444;
 }
 
 body {
@@ -17,6 +22,19 @@ body {
 
 .font-mono {
   font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+}
+
+.font-data {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-row-hover {
+  transition: background-color 0.2s ease;
+}
+
+.table-row-hover:hover {
+  background-color: rgba(243, 186, 47, 0.03);
 }
 
 @layer utilities {

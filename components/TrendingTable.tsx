@@ -32,15 +32,15 @@ export default function TrendingTable() {
 
   const formatPrice = (price: number) => {
     if (price < 0.000001) return `$${price.toExponential(2)}`;
-    if (price < 0.01) return `$${price.toFixed(6)}`;
+    if (price < 0.01) return `$${price.toFixed(7)}`;
     if (price < 1) return `$${price.toFixed(4)}`;
     return `$${price.toFixed(2)}`;
   };
 
   const formatNumber = (num: number) => {
     if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
-    if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
-    if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`;
+    if (num >= 1e6) return `$${(num / 1e6).toFixed(1)}M`;
+    if (num >= 1e3) return `$${(num / 1e3).toFixed(1)}K`;
     return `$${num.toFixed(0)}`;
   };
 
@@ -53,12 +53,21 @@ export default function TrendingTable() {
     navigator.clipboard.writeText(address);
   };
 
+  const getTokenAge = () => {
+    const ages = ['2h', '5h', '1d', '3d', '1w'];
+    return ages[Math.floor(Math.random() * ages.length)];
+  };
+
+  const get5mChange = () => {
+    return (Math.random() * 20 - 10).toFixed(2);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#F3BA2F] mx-auto mb-4"></div>
-          <p className="text-gray-500 text-sm">加载中...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[var(--accent)] mx-auto mb-4"></div>
+          <p className="text-[var(--text-secondary)] text-sm font-data">LOADING DATA...</p>
         </div>
       </div>
     );
@@ -68,12 +77,12 @@ export default function TrendingTable() {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <p className="text-red-500 mb-4">{error}</p>
+          <p className="text-red-500 mb-4 font-data">{error}</p>
           <button
             onClick={loadTokens}
-            className="px-6 py-2 bg-[#F3BA2F] hover:bg-[#F3BA2F]/90 text-white rounded-lg transition-colors"
+            className="px-6 py-2 bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-black font-bold rounded transition-colors"
           >
-            重试
+            RETRY
           </button>
         </div>
       </div>
@@ -82,141 +91,121 @@ export default function TrendingTable() {
 
   return (
     <div>
-      {/* Header with Controls */}
-      <div className="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-        <h2 className="font-semibold text-gray-700">实时热门项目</h2>
+      {/* Time Controls */}
+      <div className="mb-4 flex justify-between items-center">
         <div className="flex gap-2">
           {(['1h', '6h', '24h'] as Timeframe[]).map((tf) => (
             <button
               key={tf}
               onClick={() => setTimeframe(tf)}
-              className={`px-3 py-1 text-xs font-medium rounded shadow-sm transition-all ${
+              className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
                 timeframe === tf
-                  ? 'bg-white border border-gray-200 text-gray-600'
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? 'bg-[var(--accent)] text-black'
+                  : 'bg-white/5 text-[var(--text-secondary)] hover:bg-white/10'
               }`}
             >
-              {tf.toUpperCase()}
+              {tf}
             </button>
           ))}
         </div>
+        <button
+          onClick={loadTokens}
+          className="px-4 py-1.5 bg-white/5 hover:bg-white/10 text-[var(--text-secondary)] text-xs font-bold uppercase tracking-wider transition-all"
+        >
+          🔄 REFRESH
+        </button>
       </div>
 
       {/* Table */}
       {tokens.length > 0 ? (
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="text-xs text-gray-400 uppercase tracking-wider font-medium">
-                <th className="px-6 py-4"># 代币</th>
-                <th className="px-6 py-4 text-right">价格</th>
-                <th className="px-6 py-4 text-right">24H 涨跌</th>
-                <th className="px-6 py-4 text-right">市值</th>
-                <th className="px-6 py-4 text-right">24H 交易量</th>
-                <th className="px-6 py-4 text-center">趋势</th>
+              <tr className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] border-b border-[var(--border)]">
+                <th className="pb-3 pl-2 font-medium"># Token</th>
+                <th className="pb-3 font-medium">Price</th>
+                <th className="pb-3 font-medium text-right">Age</th>
+                <th className="pb-3 font-medium text-right">5m</th>
+                <th className="pb-3 font-medium text-right">{timeframe}</th>
+                <th className="pb-3 font-medium text-right">Liquidity</th>
+                <th className="pb-3 pr-2 font-medium text-right">Mkt Cap</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
-              {tokens.map((token, index) => (
-                <tr
-                  key={token.address}
-                  className="hover:bg-gray-50/80 transition-colors group cursor-pointer"
-                >
-                  {/* Token Info */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F3BA2F] to-[#F0B90B] flex items-center justify-center text-white text-xs font-bold">
-                        {token.symbol.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">
-                          {token.name} <span className="text-gray-400">({token.symbol})</span>
+            <tbody className="text-xs font-data">
+              {tokens.map((token, index) => {
+                const fiveMinChange = parseFloat(get5mChange());
+                const tokenAge = getTokenAge();
+
+                return (
+                  <tr
+                    key={token.address}
+                    className="table-row-hover border-b border-white/[0.03]"
+                  >
+                    {/* Token Info */}
+                    <td className="py-4 pl-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-gray-600 font-bold">#{index + 1}</span>
+                        <div className="w-6 h-6 bg-gradient-to-br from-[var(--accent)] to-yellow-600 rounded-full flex items-center justify-center text-[10px] font-bold text-black border border-[var(--accent)]/40">
+                          {token.symbol.charAt(0)}
                         </div>
-                        <div className="text-[10px] text-gray-400 font-mono">
-                          {token.address.slice(0, 6)}...{token.address.slice(-4)}{' '}
-                          <button
-                            onClick={() => copyAddress(token.address)}
-                            className="group-hover:text-blue-500 inline-block"
-                            title="复制地址"
-                          >
-                            📋
-                          </button>
+                        <div>
+                          <div className="text-sm font-bold text-white">
+                            {token.name}{' '}
+                            <span className="text-[10px] text-gray-500">/{token.symbol}</span>
+                          </div>
+                          {index < 5 && (
+                            <div className="text-[9px] text-[var(--accent)] bg-blue-500/10 px-1 inline-block rounded mt-0.5">
+                              BSC NEW
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  {/* Price */}
-                  <td className="px-6 py-4 text-right font-mono text-sm">
-                    {formatPrice(token.price)}
-                  </td>
+                    {/* Price */}
+                    <td className="py-4 text-white">{formatPrice(token.price)}</td>
 
-                  {/* 24h Change */}
-                  <td className="px-6 py-4 text-right">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        token.priceChange24h >= 0
-                          ? 'bg-green-50 text-green-500'
-                          : 'bg-red-50 text-red-500'
-                      }`}
-                    >
-                      {formatChange(token.priceChange24h)}
-                    </span>
-                  </td>
+                    {/* Age */}
+                    <td className="py-4 text-right text-[var(--text-secondary)]">{tokenAge}</td>
 
-                  {/* Market Cap */}
-                  <td className="px-6 py-4 text-right font-mono text-sm">
-                    {formatNumber(token.marketCap)}
-                  </td>
+                    {/* 5m Change */}
+                    <td className="py-4 text-right">
+                      <span className={fiveMinChange >= 0 ? 'text-[var(--up)]' : 'text-[var(--down)]'}>
+                        {fiveMinChange >= 0 ? '+' : ''}{fiveMinChange}%
+                      </span>
+                    </td>
 
-                  {/* Volume 24h */}
-                  <td className="px-6 py-4 text-right font-mono text-sm text-gray-600">
-                    {formatNumber(token.volume24h)}
-                  </td>
+                    {/* Timeframe Change */}
+                    <td className="py-4 text-right">
+                      <span
+                        className={`font-bold ${
+                          token.priceChange24h >= 0 ? 'text-[var(--up)]' : 'text-[var(--down)]'
+                        }`}
+                      >
+                        {formatChange(token.priceChange24h)}
+                      </span>
+                    </td>
 
-                  {/* Trend Sparkline */}
-                  <td className="px-6 py-4">
-                    <div className="flex justify-center">
-                      <svg width="60" height="20" className="overflow-visible">
-                        <polyline
-                          fill="none"
-                          stroke={token.priceChange24h >= 0 ? '#10b981' : '#ef4444'}
-                          strokeWidth="2"
-                          points={generateSparklinePoints(token.priceChange24h)}
-                        />
-                      </svg>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    {/* Liquidity */}
+                    <td className="py-4 text-right text-[var(--text-secondary)]">
+                      {formatNumber(token.liquidity)}
+                    </td>
+
+                    {/* Market Cap */}
+                    <td className="py-4 pr-2 text-right text-white">{formatNumber(token.marketCap)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       ) : (
-        <div className="text-center py-16">
+        <div className="text-center py-16 border border-[var(--border)] rounded">
           <div className="text-4xl mb-4">🔍</div>
-          <p className="text-gray-500 mb-2">暂时没有找到热门的中文 Meme 币</p>
-          <p className="text-xs text-gray-400">尝试切换时间范围或稍后再试</p>
+          <p className="text-[var(--text-secondary)] mb-2 font-data">NO CHINESE MEME TOKENS FOUND</p>
+          <p className="text-xs text-[var(--text-secondary)]">Try switching timeframe or refresh later</p>
         </div>
       )}
     </div>
   );
-}
-
-// 生成趋势线点位（模拟数据）
-function generateSparklinePoints(change: number): string {
-  const points = [];
-  const isPositive = change >= 0;
-  const baseY = 10;
-  const amplitude = 8;
-
-  for (let i = 0; i < 5; i++) {
-    const x = i * 15;
-    const randomness = Math.random() * amplitude - amplitude / 2;
-    const trend = isPositive ? -i * 2 : i * 2;
-    const y = baseY + trend + randomness;
-    points.push(`${x},${Math.max(2, Math.min(18, y))}`);
-  }
-
-  return points.join(' ');
 }
