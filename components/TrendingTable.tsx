@@ -261,8 +261,8 @@ export default function TrendingTable() {
       {/* Table */}
       {tokens.length > 0 ? (
         <>
-          {/* 桌面端表格 */}
-          <div className="hidden md:block overflow-x-auto">
+          {/* 桌面端表格 - 只在大屏幕显示 */}
+          <div className="hidden lg:block overflow-x-auto">
             {/* 表头 */}
             <div className="grid grid-cols-6 items-center text-sm tracking-wide py-3 px-2 mb-1" style={{
               borderBottom: '1px solid rgba(0, 255, 255, 0.1)',
@@ -364,8 +364,8 @@ export default function TrendingTable() {
             ))}
           </div>
 
-          {/* 移动端卡片布局 */}
-          <div className="md:hidden space-y-3">
+          {/* 移动端和平板卡片布局 */}
+          <div className="lg:hidden space-y-3">
             {/* 排序选择器 */}
             <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] pb-2 border-b border-[rgba(0,255,255,0.1)]">
               <span>排序:</span>
