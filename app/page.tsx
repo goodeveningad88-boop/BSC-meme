@@ -7,29 +7,29 @@ export default function Home() {
     <div className="min-h-screen flex flex-col relative" style={{zIndex: 1}}>
       {/* Header */}
       <header className="relative" style={{ background: '#000000' }}>
-        <div className="py-6 px-4 md:px-6">
+        <div className="py-4 px-3 md:py-6 md:px-6">
           <div className="max-w-7xl mx-auto">
-            {/* 标题和搜索框并排 */}
-            <div className="flex items-center justify-between gap-4">
+            {/* 移动端：垂直布局，桌面端：水平布局 */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold tracking-wide neon-text font-cyber">
+                <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold tracking-wide neon-text font-cyber">
                   BSC中文MEME看板
                 </h1>
                 <p className="text-[var(--text-secondary)] text-xs mt-1 tracking-wide">
                   实时追踪 BSC 链上的中文 MEME 代币
                 </p>
-                <p className="text-[var(--text-secondary)] text-sm mt-1 flex items-center gap-1 font-bold">
+                <p className="text-[var(--text-secondary)] text-xs sm:text-sm mt-1 flex items-center gap-1 font-bold">
                   Tracker制作人：林晚晚的猫@linwanwan823
                   <img
                     src="/avatar.png"
                     alt="林晚晚的猫"
-                    className="w-10 h-10 object-contain"
+                    className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
                   />
                 </p>
               </div>
 
-              {/* 搜索框 */}
-              <div className="relative w-56 md:w-72 shrink-0">
+              {/* 搜索框 - 移动端全宽 */}
+              <div className="relative w-full md:w-72 shrink-0">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="11" cy="11" r="8"/>
@@ -48,7 +48,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow py-6 px-4 md:py-8 md:px-6 relative" style={{background: '#000000'}}>
+      <main className="flex-grow py-4 px-2 sm:px-3 md:py-8 md:px-6 relative" style={{background: '#000000'}}>
         <div className="max-w-7xl mx-auto">
           {/* Table Container */}
           <div className="relative w-full rounded-lg overflow-hidden" style={{
